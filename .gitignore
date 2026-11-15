@@ -1,0 +1,16 @@
+.DS_Store
+.env
+node_modules/
+iosApp/Config/Local.xcconfig
+iosApp/build/
+iosApp/*.xcodeproj
+iosApp/PhoneGolf/Info.plist
+iosApp/PickupsReport/Info.plist
+.secrets/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+iosApp/fastlane/report.xml
+androidApp/fastlane/report.xml
+vendor/

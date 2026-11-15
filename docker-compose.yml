@@ -1,0 +1,22 @@
+# Phone Golf's own stack. On the server it joins the shared "web" network so
+# deadly's Caddy can reverse_proxy to `phone-golf:3000`. It never binds 80/443.
+#
+# One-time on the host:  docker network create web
+services:
+  phone-golf:
+    image: ghcr.io/ds17f/phone-golf:${IMAGE_TAG:-latest}
+    build: .
+    restart: unless-stopped
+    volumes:
+      - phone_golf_data:/app/data   # SQLite database
+    expose:
+      - "3000"
+    networks:
+      - web
+
+volumes:
+  phone_golf_data:
+
+networks:
+  web:
+    external: true

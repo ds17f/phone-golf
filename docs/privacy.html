@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone Golf privacy policy</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<h1>Phone Golf privacy policy</h1>
+<p class="small">Effective date: 15 November 2026</p>
+
+<p>Phone Golf counts the number of times that you pick up your phone each day.
+This policy tells you which data the app uses and where the data goes. Phone
+Golf is open source. You can read the code at
+<a href="https://github.com/ds17f/phone-golf">github.com/ds17f/phone-golf</a>.</p>
+
+<h2>Solo play</h2>
+<p>Solo play is the default. In solo play, all data stays on your phone. The
+app sends nothing to a server. The data on your phone is:</p>
+<ul>
+<li>The name that you type, if you type one.</li>
+<li>Your handicap.</li>
+<li>Your count for each day.</li>
+</ul>
+
+<h2>How the app counts</h2>
+<p><strong>Android:</strong> the app asks for usage access. The app uses this
+access only to count the times that you unlock the phone each day. The app does
+not read which apps you use.</p>
+<p><strong>iPhone:</strong> the app asks for Screen Time access. iOS shows your
+pickups in the app. The app cannot read this data, and the data does not leave
+your phone. For group play, you type the number.</p>
+
+<h2>Group play</h2>
+<p>Group play is an option. If you play with a group, the app sends this data
+to the Phone Golf server:</p>
+<ul>
+<li>The name that you type. It does not have to be your real name.</li>
+<li>Your handicap and your count for each day.</li>
+<li>The groups and rounds that you make or join.</li>
+<li>Your platform (iPhone, Android or web).</li>
+</ul>
+<p>The server makes a secret player key and the app keeps it. The server keeps
+only a hash of the key. The game has no accounts, no email addresses and no
+passwords. The other players in your groups can see your name, your handicap
+and your scores.</p>
+<p>The server writes standard web logs, which can include your IP address. The
+logs are used only to operate the server and to find problems.</p>
+
+<h2>What Phone Golf does not do</h2>
+<ul>
+<li>It does not show advertisements.</li>
+<li>It does not use analytics or tracking tools.</li>
+<li>It does not sell data or give data to other companies.</li>
+<li>It does not collect your location, your contacts or your app usage.</li>
+</ul>
+
+<h2>How to delete your data</h2>
+<p><strong>Solo play:</strong> use "Start over" in Settings, or remove the app.
+This deletes all the data.</p>
+<p><strong>Group play:</strong> you can leave a group in the app. To delete
+your player and all your scores from the server, open an issue at
+<a href="https://github.com/ds17f/phone-golf/issues">github.com/ds17f/phone-golf/issues</a>.
+Do not put your player key in the issue.</p>
+
+<h2>Children</h2>
+<p>Phone Golf is not made for children less than 13 years old.</p>
+
+<h2>Changes</h2>
+<p>If this policy changes, this page shows the new policy and a new effective
+date. The history of the page is public in the source repository.</p>
+
+<h2>Contact</h2>
+<p>Open an issue at
+<a href="https://github.com/ds17f/phone-golf/issues">github.com/ds17f/phone-golf/issues</a>.</p>
+</main>
+</body>
+</html>

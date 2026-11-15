@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# Run an iOS command on the Mac in IOS_HOST. iosApp/Makefile calls this script
+# when it does not run on a Mac. The script copies the working tree to the Mac,
+# then runs the same command there over ssh, in the same Makefile. This is the
+# same method as ios/scripts/remote in the openmat monorepo.
+#
+# Usage: iosApp/scripts/remote <sync|check|generate|build|sim|device|clean>
+#
+# Settings come from the environment or from `.env` in the repository root. A
+# variable in the environment wins over `.env`. See `.env.example`.
+set -euo pipefail
+cd "$(dirname "$0")/../.."  # the root of the repository
+
+command=${1:?Usage: iosApp/scripts/remote <sync|check|generate|build|sim|device|clean>}
+
+load_env() {
+  local vars="IOS_HOST IOS_REMOTE_PATH IOS_SSH_OPTS IOS_SIM IOS_DEVICE IOS_KEYCHAIN_PASSWORD"
+  local v saved=""
+  for v in $vars; do
+    if [ -n "${!v+x}" ]; then saved+=" $v=$(printf '%q' "${!v}")"; fi
+  done
+  if [ -f .env ]; then
+    set -a
+    # shellcheck disable=SC1091
+    . ./.env
+    set +a
+  fi
+  if [ -n "$saved" ]; then eval "export$saved"; fi
+}
+load_env
+
+REMOTE_PATH=${IOS_REMOTE_PATH:-Developer/phone-golf}
+# Word splitting is intended: IOS_SSH_OPTS holds options such as `-i key -p 22`.
+# shellcheck disable=SC2206
+SSH_OPTS=(${IOS_SSH_OPTS:-})
+
+quote() { printf "'%s'" "${1//\'/\'\\\'\'}"; }
+
+need_host() {
+  [ -n "${IOS_HOST:-}" ] && return
+  echo "IOS_HOST is not set. Copy .env.example to .env and set it, or run on a Mac." >&2
+  exit 1
+}
+
+sync_tree() {
+  need_host
+  # The filter skips what .gitignore lists, and the copy never deletes those
+  # files on the Mac. The .env file is in .gitignore, so it stays on this
+  # computer. Local.xcconfig is not secret and the Mac needs it.
+  rsync -az --delete \
+    -e "ssh ${SSH_OPTS[*]-}" \
+    --rsync-path="mkdir -p $REMOTE_PATH && rsync" \
+    --include='/iosApp/Config/Local.xcconfig' \
+    --filter=':- .gitignore' \
+    --exclude='.git' --exclude='.claude' --exclude='/androidApp' \
+    ./ "$IOS_HOST:$REMOTE_PATH/"
+}
+
+# Check from this computer that the Mac accepts ssh and the keychain password.
+# The checks on the Mac itself run in `iosApp/scripts/check`.
+check_remote() {
+  need_host
+  echo "Checks from this computer to $IOS_HOST"
+  if ssh -o BatchMode=yes -o ConnectTimeout=8 "${SSH_OPTS[@]+"${SSH_OPTS[@]}"}" "$IOS_HOST" true 2>/dev/null; then
+    echo "  ok    ssh works without a password"
+  else
+    echo "  FAIL  ssh does not work without a password. See \"iOS\" in README.md."
+    exit 1
+  fi
+  if [ -z "${IOS_KEYCHAIN_PASSWORD:-}" ]; then
+    echo "  FAIL  IOS_KEYCHAIN_PASSWORD is not set in .env. See \"iOS\" in README.md."
+  elif printf '%s\n' "$IOS_KEYCHAIN_PASSWORD" |
+    ssh "${SSH_OPTS[@]+"${SSH_OPTS[@]}"}" "$IOS_HOST" \
+      'IFS= read -r p && security unlock-keychain -p "$p" ~/Library/Keychains/login.keychain-db' 2>/dev/null; then
+    echo "  ok    the keychain password unlocks the login keychain"
+  else
+    echo "  FAIL  the Mac rejects the keychain password. See \"iOS\" in README.md."
+  fi
+}
+
+# Run a command of iosApp/Makefile on the Mac. If $2 is "unlock" and the
+# password is set, the same ssh session unlocks the keychain first. A keychain
+# unlock applies only to the session that did it, so a separate unlock is not
+# enough.
+remote_make() {
+  need_host
+  local args=("$1")
+  [ -n "${IOS_SIM:-}" ] && args+=("IOS_SIM=$(quote "$IOS_SIM")")
+  [ -n "${IOS_DEVICE:-}" ] && args+=("IOS_DEVICE=$(quote "$IOS_DEVICE")")
+  local run="make -C $REMOTE_PATH/iosApp ${args[*]}"
+  if [ "${2:-}" = unlock ] && [ -n "${IOS_KEYCHAIN_PASSWORD:-}" ]; then
+    printf '%s\n' "$IOS_KEYCHAIN_PASSWORD" |
+      ssh "${SSH_OPTS[@]+"${SSH_OPTS[@]}"}" "$IOS_HOST" \
+        "IFS= read -r p && security unlock-keychain -p \"\$p\" ~/Library/Keychains/login.keychain-db && unset p && $run"
+  else
+    ssh "${SSH_OPTS[@]+"${SSH_OPTS[@]}"}" "$IOS_HOST" "$run"
+  fi
+}
+
+case $command in
+  sync) sync_tree ;;
+  check)
+    check_remote
+    sync_tree
+    remote_make check
+    ;;
+  device)
+    sync_tree
+    remote_make device unlock
+    ;;
+  *)
+    sync_tree
+    remote_make "$command"
+    ;;
+esac

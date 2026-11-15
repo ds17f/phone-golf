@@ -1,0 +1,8 @@
+# Local run without the shared network:  docker compose -f docker-compose.dev.yml up --build
+services:
+  phone-golf:
+    build: .
+    ports:
+      - "3100:3000"
+    volumes:
+      - ./api/data:/app/data

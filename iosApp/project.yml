@@ -1,0 +1,90 @@
+# The Xcode project is not in git. `make ios-generate` makes it from this file.
+name: PhoneGolf
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+options:
+  bundleIdPrefix: com.phonegolf
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # The team and the API address are in Config/Base.xcconfig and
+    # Config/Local.xcconfig.
+targets:
+  PhoneGolf:
+    type: application
+    platform: iOS
+    sources:
+      - PhoneGolf
+      - Shared
+    info:
+      path: PhoneGolf/Info.plist
+      properties:
+        CFBundleDisplayName: Phone Golf
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # The app uses only HTTPS from the system. It has no other encryption.
+        ITSAppUsesNonExemptEncryption: false
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        # Base URL of the Phone Golf API. Change in Settings inside the app too.
+        PGApiBaseURL: $(PG_API_BASE_URL)
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+    entitlements:
+      path: PhoneGolf/PhoneGolf.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        # The app gives the round to the report extension through this group.
+        com.apple.security.application-groups: [group.com.phonegolf.app]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.phonegolf.app
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      # The Release configuration is for the stores. It uses the distribution
+      # certificate and a profile from the Apple Developer site. Debug builds
+      # use automatic signing.
+      configs:
+        Release:
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: Apple Distribution
+          PROVISIONING_PROFILE_SPECIFIER: PhoneGolf AppStore
+    dependencies:
+      - target: PickupsReport
+        embed: true
+  PickupsReport:
+    type: app-extension
+    platform: iOS
+    sources:
+      - PickupsReport
+      - Shared
+    info:
+      path: PickupsReport/Info.plist
+      properties:
+        CFBundleDisplayName: Phone Golf Pickups
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.deviceactivityui.report-extension
+    entitlements:
+      path: PickupsReport/PickupsReport.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        # The app gives the round to the report extension through this group.
+        com.apple.security.application-groups: [group.com.phonegolf.app]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.phonegolf.app.PickupsReport
+      # The Release configuration is for the stores. It uses the distribution
+      # certificate and a profile from the Apple Developer site. Debug builds
+      # use automatic signing.
+      configs:
+        Release:
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: Apple Distribution
+          PROVISIONING_PROFILE_SPECIFIER: PhoneGolf PickupsReport AppStore

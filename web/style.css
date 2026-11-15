@@ -1,0 +1,233 @@
+:root {
+  --bg: #eef1e8;
+  --card: #ffffff;
+  --ink: #1d2420;
+  --muted: #66706a;
+  --line: #d9ded3;
+  --green: #1f5a36;          /* club green: buttons, links, header */
+  --green-ink: #ffffff;
+  --board: #17432a;          /* leaderboard background */
+  --board-line: #2b5f40;
+  --plaque: #fbfaf4;
+  --plaque-ink: #142019;
+  --paper: #fbf6e6;          /* scorecard paper */
+  --paper-line: #c9bf9f;
+  --paper-ink: #2a2a22;
+  --paper-head: #1f5a36;
+  --under: #c0282d;          /* golf convention: red = under par */
+  --over: #1d2420;
+  --even: #1f5a36;
+  --focus: #1f6feb;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  --num: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1511;
+    --card: #182019;
+    --ink: #e6ebe6;
+    --muted: #97a39a;
+    --line: #2a352d;
+    --green: #5fb47f;
+    --green-ink: #0b130e;
+    --board: #0f2d1c;
+    --board-line: #23503a;
+    --plaque: #ece8d8;
+    --plaque-ink: #142019;
+    --paper: #e9e2c8;
+    --paper-line: #b7ab86;
+    --paper-ink: #24241d;
+    --paper-head: #1c4f30;
+    --under: #b3242a;
+    --over: #24241d;
+    --even: #1c4f30;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+a { color: var(--green); }
+.top {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; background: var(--paper-head); color: #fff;
+}
+.brand { font: 700 19px/1 var(--serif); letter-spacing: .5px; text-decoration: none; color: #fff; }
+.who { font-size: 14px; color: #d8e6dc; text-decoration: none; }
+main { max-width: 900px; margin: 0 auto; padding: 16px; }
+
+h1 { font: 700 26px/1.2 var(--serif); margin: 8px 0 4px; }
+h2 { font: 700 19px/1.2 var(--serif); margin: 0 0 8px; }
+.sub { color: var(--muted); margin: 0 0 16px; }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px; margin-bottom: 16px;
+}
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
+.row > * { flex: 1 1 140px; }
+label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+input, select {
+  width: 100%; padding: 10px 12px; font: inherit; color: var(--ink);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+}
+input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--focus); outline-offset: 2px;
+}
+button {
+  padding: 10px 16px; font: inherit; font-weight: 600; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--green); background: var(--green); color: var(--green-ink);
+}
+button.ghost { background: transparent; color: var(--green); }
+button.small { padding: 4px 10px; font-size: 14px; }
+.list { list-style: none; padding: 0; margin: 0; }
+.list li { padding: 10px 0; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px; }
+.list li:first-child { border-top: 0; }
+.pill { font-size: 12px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.pill.active { border-color: var(--green); color: var(--green); }
+.code { font: 600 22px/1 var(--num); letter-spacing: 3px; }
+.err { color: var(--under); }
+.ok { color: var(--green); }
+.muted { color: var(--muted); }
+
+.under { color: var(--under); font-weight: 700; }
+.over { color: var(--over); font-weight: 700; }
+.even { color: var(--even); font-weight: 700; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ---- Tournament leaderboard ------------------------------------------- */
+.board {
+  background: var(--board); color: #fff; border-radius: 10px; padding: 14px 12px 12px;
+  margin-bottom: 20px; box-shadow: inset 0 0 0 3px var(--board-line), 0 2px 8px rgb(0 0 0 / .15);
+}
+.board-head { text-align: center; margin-bottom: 10px; }
+.board-title { font: 700 26px/1.1 var(--serif); letter-spacing: 6px; text-transform: uppercase; }
+.board-sub { font-size: 13px; color: #cfe3d6; margin-top: 4px; letter-spacing: .5px; }
+.board-table { width: 100%; border-collapse: separate; border-spacing: 0 5px; font-variant-numeric: tabular-nums; }
+.board-table th {
+  font: 600 11px/1 system-ui, sans-serif; letter-spacing: 1.5px; text-transform: uppercase;
+  color: #cfe3d6; padding: 2px 6px; text-align: center;
+}
+.board-table th.l, .board-table td.l { text-align: left; }
+.board-table td {
+  background: var(--plaque); color: var(--plaque-ink); text-align: center;
+  padding: 9px 6px; font: 700 17px/1 var(--num);
+}
+.board-table td:first-child { border-radius: 4px 0 0 4px; }
+.board-table td:last-child { border-radius: 0 4px 4px 0; }
+.board-table td.plaque {
+  font: 700 16px/1.1 var(--serif); text-transform: uppercase; letter-spacing: 1px;
+  border-left: 2px solid var(--board); border-right: 2px solid var(--board);
+}
+.board-table td.pos { width: 44px; font-size: 15px; }
+.board-table td.big { font-size: 20px; width: 70px; }
+.board-table td .muted { color: #8a918c; }
+.board-table tr.me td { box-shadow: inset 0 3px 0 #e8c547, inset 0 -3px 0 #e8c547; }
+.board-table td .even { color: #1f5a36; }
+.board-table td .over { color: var(--plaque-ink); }
+
+/* ---- Paper scorecard -------------------------------------------------- */
+.paper {
+  background: var(--paper); color: var(--paper-ink); border-radius: 6px;
+  border: 1px solid var(--paper-line); padding: 0 0 12px; margin-bottom: 20px;
+  box-shadow: 0 1px 0 rgb(0 0 0 / .04), 0 6px 18px rgb(0 0 0 / .10);
+  overflow: hidden;
+}
+.paper-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  background: var(--paper-head); color: #fff; padding: 12px 14px;
+}
+.paper-title { font: 700 20px/1.1 var(--serif); }
+.paper-sub { font-size: 13px; color: #d8e6dc; margin-top: 2px; }
+.paper-badge { font: 600 12px/1 var(--serif); letter-spacing: 2px; text-transform: uppercase; color: #e8c547; white-space: nowrap; }
+.paper .half { padding: 12px 12px 0; }
+
+/* The card fits the width: a label column, nine equal hole columns, one sum column. */
+.scorecard {
+  border-collapse: collapse; width: 100%; table-layout: fixed;
+  font: 600 14px/1 var(--num); font-variant-numeric: tabular-nums;
+  border: 2px solid var(--paper-ink);
+}
+.scorecard th, .scorecard td {
+  border: 1px solid var(--paper-line); text-align: center; padding: 0; height: 36px; overflow: hidden;
+}
+.scorecard th:first-child, .scorecard td:first-child {
+  text-align: left; padding: 0 8px; width: 96px; border-right: 2px solid var(--paper-ink);
+}
+.scorecard thead th { font-weight: 700; }
+.scorecard .r-hole th { background: var(--paper-head); color: #fff; font: 700 13px/1 var(--serif); letter-spacing: 1px; text-transform: uppercase; }
+.scorecard .r-hole th.now { background: #e8c547; color: #1d2420; }
+.scorecard .r-day th { height: 22px; font: 600 11px/1 system-ui, sans-serif; color: #6b6550; }
+.scorecard .r-par th { background: rgb(31 90 54 / .10); border-bottom: 2px solid var(--paper-ink); }
+.scorecard .tot { background: rgb(0 0 0 / .05); font-weight: 800; width: 52px; border-left: 2px solid var(--paper-ink); }
+.scorecard.totals .tot { width: auto; }
+.scorecard.totals td { font-weight: 800; }
+.scorecard .r-hole .tot { background: #173f27; }
+.scorecard td.now { background: rgb(232 197 71 / .22); }
+.scorecard tr.me td:first-child { background: rgb(232 197 71 / .25); }
+.scorecard .pname span { display: block; font: 700 14px/1.1 var(--serif); }
+.scorecard .pname small { display: block; font: 500 10px/1.2 system-ui, sans-serif; color: #6b6550; margin-top: 2px; }
+.parbtn {
+  all: unset; cursor: pointer; display: inline-block; min-width: 24px; padding: 3px 2px; border-radius: 3px;
+  border-bottom: 1px dashed currentColor;
+}
+.parbtn:hover { background: rgb(31 90 54 / .15); }
+.parbtn:focus-visible { outline: 2px solid var(--focus); }
+
+/* Score marks, like pen on a paper card: circle under, square over. */
+.mk { display: inline-grid; place-items: center; min-width: 28px; height: 28px; padding: 0 3px; font-size: 13px; }
+.mk.par { color: var(--paper-ink); }
+.mk.birdie { border: 1.5px solid var(--under); border-radius: 999px; color: var(--under); }
+.mk.eagle { border: 1.5px solid var(--under); border-radius: 999px; color: var(--under); box-shadow: 0 0 0 2px var(--paper), 0 0 0 3.5px var(--under); }
+.mk.bogey { border: 1.5px solid var(--paper-ink); color: var(--paper-ink); }
+.mk.double { border: 1.5px solid var(--paper-ink); color: var(--paper-ink); box-shadow: 0 0 0 2px var(--paper), 0 0 0 3.5px var(--paper-ink); }
+.scorecard .tot .under, .legend .under { color: var(--under); }
+.scorecard .tot .over { color: var(--paper-ink); }
+.scorecard .tot .even { color: var(--paper-head); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 12px 14px 0; font-size: 13px; align-items: center; }
+.legend > span { display: inline-flex; align-items: center; gap: 8px; }
+.fine { font-size: 12px; color: #6b6550; padding: 8px 14px 0; margin: 0; }
+
+/* Row labels read like printed text, not like pen. */
+.scorecard thead th:first-child { font: 700 12px/1 var(--serif); letter-spacing: 1px; text-transform: uppercase; }
+
+/* ---- Scoreboard strip and score entry ------------------------------------ */
+.strip {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;
+  background: var(--board); border-radius: 10px; padding: 10px; margin-bottom: 16px;
+  box-shadow: inset 0 0 0 3px var(--board-line);
+}
+.strip .lbl { display: block; font: 600 11px/1 system-ui, sans-serif; letter-spacing: 1.5px; text-transform: uppercase; color: #cfe3d6; margin: 2px 0 6px; }
+.strip .plq { background: var(--plaque); color: var(--plaque-ink); border-radius: 4px; padding: 8px 4px; }
+.strip b { display: block; font: 700 30px/1.1 var(--num); }
+.strip small { font-size: 11px; color: #6b6550; }
+.strip .even { color: #1f5a36; }
+.strip .over { color: var(--plaque-ink); }
+.mark { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+.mark strong { font: 700 16px/1 var(--serif); margin-right: 4px; }
+.mark input, .mark select { width: auto; flex: 1 1 110px; background: var(--card); }
+.mark .msg { flex-basis: 100%; margin: 0; }
+.empty { text-align: center; padding: 60px 0; color: var(--muted); }
+
+@media (max-width: 480px) {
+  .scorecard { font-size: 11px; }
+  .scorecard th, .scorecard td { height: 32px; }
+  .scorecard th:first-child, .scorecard td:first-child { width: 54px; padding: 0 4px; }
+  .scorecard .pname span { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .scorecard .tot { width: 36px; }
+  .scorecard .r-hole th { font-size: 11px; letter-spacing: 0; }
+  .mk { min-width: 18px; height: 18px; font-size: 10px; padding: 0 1px; }
+  .mk.eagle, .mk.double { box-shadow: 0 0 0 1.5px var(--paper), 0 0 0 2.5px currentColor; }
+  .paper .half { padding: 10px 8px 0; }
+  .strip b { font-size: 26px; }
+  .board-title { font-size: 21px; letter-spacing: 4px; }
+  .board-table td { font-size: 15px; padding: 8px 4px; }
+  .board-table td.plaque { font-size: 14px; }
+  .board-table td.big { font-size: 17px; width: 54px; }
+}

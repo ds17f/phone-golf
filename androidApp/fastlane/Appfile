@@ -1,0 +1,4 @@
+package_name("com.phonegolf.app")
+
+# The key of the Google Play service account. It is not in git.
+json_key_file(File.expand_path("../../.secrets/play-store.json", __dir__))

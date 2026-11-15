@@ -1,0 +1,66 @@
+#!/bin/sh
+# Check the Mac for the prerequisites of the iOS build. Run on the Mac, with
+# `make ios-check`. The script changes nothing. It prints the fix for each
+# problem and exits 1 if a required check fails.
+cd "$(dirname "$0")/.." || exit 1
+export PATH=/opt/homebrew/bin:/usr/local/bin:$PATH
+failed=0
+
+ok()   { printf '  ok    %s\n' "$1"; }
+fail() { printf '  FAIL  %s\n        Fix: %s\n' "$1" "$2"; failed=1; }
+warn() { printf '  warn  %s\n        Fix: %s\n' "$1" "$2"; }
+
+echo "Checks on the Mac ($(hostname))"
+
+if xcodebuild -version >/dev/null 2>&1; then
+  ok "Xcode is installed: $(xcodebuild -version | head -1)"
+else
+  fail "Xcode is not installed." "Install Xcode from the App Store, then run: sudo xcode-select -s /Applications/Xcode.app"
+fi
+
+if xcodebuild -checkFirstLaunchStatus >/dev/null 2>&1; then
+  ok "Xcode license and first launch are done"
+else
+  fail "Xcode first-launch setup is not done." "Run: sudo xcodebuild -runFirstLaunch"
+fi
+
+if command -v xcodegen >/dev/null 2>&1; then
+  ok "XcodeGen is installed"
+else
+  fail "XcodeGen is not installed." "Run: brew install xcodegen"
+fi
+
+if [ -f Config/Local.xcconfig ] &&
+  grep -Eq '^DEVELOPMENT_TEAM *= *[A-Z0-9]{10}' Config/Local.xcconfig; then
+  ok "iosApp/Config/Local.xcconfig has a team ID"
+else
+  fail "iosApp/Config/Local.xcconfig is missing or has no team ID." \
+    "Copy Config/Local.xcconfig.example to Config/Local.xcconfig and set DEVELOPMENT_TEAM."
+fi
+
+if defaults read com.apple.dt.Xcode DVTDeveloperAccountManagerAppleIDLists >/dev/null 2>&1; then
+  ok "Xcode is signed in to an Apple ID"
+else
+  fail "Xcode is not signed in to an Apple ID." "In Xcode on the Mac: Settings > Accounts > +."
+fi
+
+if security find-identity -v -p codesigning 2>/dev/null | grep -q 'Apple Development'; then
+  ok "An Apple Development signing certificate is in the keychain"
+else
+  warn "No Apple Development certificate in the keychain yet." \
+    "Xcode makes one on the first device build."
+fi
+
+if id=$(./scripts/device-id 2>&1); then
+  ok "One iPhone is connected ($id)"
+else
+  warn "$id" \
+    "Connect the iPhone with a cable, unlock it, and tap Trust. Developer Mode must be on."
+fi
+
+if [ "$failed" -eq 0 ]; then
+  echo "All required checks passed."
+else
+  echo "Some required checks failed. Fix them and run: make ios-check"
+  exit 1
+fi

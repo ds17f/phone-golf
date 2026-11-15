@@ -1,0 +1,21 @@
+#!/bin/sh
+# Print the identifier of the one connected iPhone. Exit 1 with a message if
+# no iPhone or more than one iPhone is connected. Run on the Mac.
+set -eu
+json=$(mktemp)
+trap 'rm -f "$json"' EXIT
+xcrun devicectl list devices --json-output "$json" >/dev/null 2>&1
+python3 - "$json" <<'PY'
+import json, sys
+devices = json.load(open(sys.argv[1]))["result"]["devices"]
+found = [
+    d for d in devices
+    if d.get("hardwareProperties", {}).get("deviceType") == "iPhone"
+    and d.get("connectionProperties", {}).get("tunnelState") != "unavailable"
+]
+if len(found) != 1:
+    names = ", ".join(d["deviceProperties"]["name"] for d in found) or "none"
+    sys.exit(f"Expected one connected iPhone, found {len(found)} ({names}). "
+             "Connect one iPhone, or set IOS_DEVICE=<identifier>.")
+print(found[0]["identifier"])
+PY

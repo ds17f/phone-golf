@@ -1,0 +1,13 @@
+// Build settings for all configurations.
+//
+// Do not put a team ID here. Put it in Local.xcconfig (not in git). See
+// Local.xcconfig.example.
+
+CODE_SIGN_STYLE = Automatic
+DEVELOPMENT_TEAM =
+
+// The address of the Phone Golf API. The player can change it in Settings.
+// `$()` keeps the two slashes from starting a comment.
+PG_API_BASE_URL = https:/$()/phonegolf.makersundays.com
+
+#include? "Local.xcconfig"

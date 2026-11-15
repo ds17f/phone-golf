@@ -1,0 +1,52 @@
+# Lanes for the iOS release. The release workflow uses them. See
+# docs/RELEASE.md.
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build the store app and send it to TestFlight"
+  lane :deploy_testflight do
+    team = ENV.fetch("IOS_TEAM_ID")
+    version = ENV.fetch("VERSION_NAME")
+    build = ENV.fetch("VERSION_CODE")
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("APP_STORE_CONNECT_KEY_ID"),
+      issuer_id: ENV.fetch("APP_STORE_CONNECT_ISSUER_ID"),
+      key_filepath: File.expand_path("../../.secrets/asc-key.p8", __dir__),
+      in_house: false
+    )
+
+    # The Xcode project is not in git. XcodeGen makes it from project.yml.
+    sh("cd .. && xcodegen generate --spec project.yml --quiet")
+
+    # The Release configuration in project.yml selects manual signing and the
+    # two profiles. This stops Xcode from making a new certificate on each run.
+    gym(
+      project: "PhoneGolf.xcodeproj",
+      scheme: "PhoneGolf",
+      configuration: "Release",
+      destination: "generic/platform=iOS",
+      derived_data_path: "./build",
+      output_directory: "./build",
+      output_name: "PhoneGolf.ipa",
+      xcargs: "DEVELOPMENT_TEAM='#{team}' MARKETING_VERSION='#{version}' CURRENT_PROJECT_VERSION='#{build}'",
+      export_options: {
+        method: "app-store-connect",
+        signingStyle: "manual",
+        teamID: team,
+        provisioningProfiles: {
+          "com.phonegolf.app" => "PhoneGolf AppStore",
+          "com.phonegolf.app.PickupsReport" => "PhoneGolf PickupsReport AppStore"
+        }
+      }
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      ipa: "./build/PhoneGolf.ipa",
+      skip_waiting_for_build_processing: true,
+      changelog: (ENV["RELEASE_NOTES"] || "").strip
+    )
+  end
+end

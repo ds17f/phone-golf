@@ -1,0 +1,50 @@
+# Lanes for the Android release. The release workflow uses them. See
+# docs/RELEASE.md.
+
+default_platform(:android)
+
+platform :android do
+  # Write the release notes where `upload_to_play_store` looks for them.
+  def notes_dir
+    text = (ENV["RELEASE_NOTES"] || "").strip
+    return nil if text.empty?
+    dir = "/tmp/fl_metadata/en-US/changelogs"
+    FileUtils.mkdir_p(dir)
+    File.write("#{dir}/default.txt", text[0, 500])
+    "/tmp/fl_metadata"
+  end
+
+  desc "Upload a signed bundle to the internal test track of Google Play"
+  lane :upload_internal do |options|
+    metadata = notes_dir
+    upload_to_play_store(
+      track: "internal",
+      aab: options[:aab],
+      # Until the app is public in Google Play, a release must be a draft. Set
+      # PLAY_RELEASE_STATUS to "completed" after the first public release.
+      release_status: ENV["PLAY_RELEASE_STATUS"] || "draft",
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: metadata.nil?,
+      metadata_path: metadata
+    )
+  end
+
+  desc "Move the newest internal build to a different track (to:alpha, to:beta, to:production)"
+  lane :promote do |options|
+    code = google_play_track_version_codes(track: "internal").max
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: options[:to],
+      version_code: code,
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true
+    )
+  end
+end

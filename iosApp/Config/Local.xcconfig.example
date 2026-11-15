@@ -1,0 +1,8 @@
+// Copy this file to Local.xcconfig and set the values. Local.xcconfig is not
+// in git. `make ios-sync` copies it to the Mac.
+
+// The 10-character team ID from developer.apple.com, under Membership.
+DEVELOPMENT_TEAM = ABCDE12345
+
+// Optional: a different API address for this computer.
+//PG_API_BASE_URL = https:/$()/golf.example.com
